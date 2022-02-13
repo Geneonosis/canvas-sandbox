@@ -39,8 +39,18 @@ export class AppComponent implements OnInit, AfterViewInit {
     image.src = this.selectedImage;
     //what to do on image load
     image.onload = () => {
+      //reset the canvas area to black
+      this.canvasContext.fillStyle = 'black';
+      this.canvasContext.fillRect(
+        0,
+        0,
+        this.canvasNativeElement.width,
+        this.canvasNativeElement.height
+      );
+      //draw the image
       this.canvasContext.drawImage(image, 0, 0, image.width, image.height);
 
+      //draw the red border
       this.canvasContext.strokeStyle = 'red';
       this.canvasContext.strokeRect(
         0,
@@ -48,6 +58,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.canvasNativeElement.width,
         this.canvasNativeElement.height
       );
+
+      //draw the red center point
       this.canvasContext.fillStyle = 'red';
       this.canvasContext.fillRect(
         this.canvasNativeElement.width / 2 - 2,
@@ -55,6 +67,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         4,
         4
       );
+
+      //draw the black background for the center point text
       this.canvasContext.fillStyle = 'black';
       this.canvasContext.fillRect(
         this.canvasNativeElement.width / 2 - 2,
@@ -62,20 +76,30 @@ export class AppComponent implements OnInit, AfterViewInit {
         100,
         10
       );
+
+      //draw the center point text
       this.canvasContext.fillStyle = 'red';
       this.canvasContext.fillText(
         `center point`,
         this.canvasNativeElement.width / 2,
         this.canvasNativeElement.height / 2 - 10
       );
+
+      //draw the black background for the image stats text
+      this.canvasContext.fillStyle = 'black';
+      this.canvasContext.fillRect(3, 2, 180, 40);
+
+      //draw the image stats text
+      this.canvasContext.fillStyle = 'red';
       this.canvasContext.fillText(
-        `width x height: ${this.canvasNativeElement.width} x ${this.canvasNativeElement.height}`,
+        `canvas: width x height: ${this.canvasNativeElement.width} x ${this.canvasNativeElement.height}`,
         10,
-        10
+        11
       );
-      console.log(
-        this.canvasNativeElement.width,
-        this.canvasNativeElement.height
+      this.canvasContext.fillText(
+        `image: width x height: ${image.width} x ${image.height}`,
+        10,
+        21
       );
     };
   }
@@ -91,7 +115,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     const randomImages = [];
     for (let i = 0; i < 10; i++) {
       randomImages.push(
-        `https://picsum.photos/id/${Math.floor(Math.random() * 1000)}/1920/1080`
+        `https://picsum.photos/id/${Math.floor(
+          Math.random() * 1000
+        )}/${Math.floor(Math.random() * 1920)}/${Math.floor(
+          Math.random() * 1080
+        )}`
       );
     }
     return randomImages;
