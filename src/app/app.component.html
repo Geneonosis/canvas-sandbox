@@ -3,8 +3,9 @@
     <span id="title">
       <h3>Image List</h3>
     </span>
-    <span id="imageItem" *ngFor="let image of images" (click)="onClickImage(image)"><img src="{{image}}" alt="{{image}}"
-        width="100" height="100" /></span>
+    <span id="imageItem" *ngFor="let image of images" (click)="onClickImage(image)">
+      <img id="imageElement" src="{{image}}" alt="{{image}}" onerror="this.style.display='none'" />
+    </span>
   </div>
   <div id="canvasContainer">
     <canvas #canvas></canvas>
