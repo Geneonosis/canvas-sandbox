@@ -39,13 +39,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     image.src = this.selectedImage;
     //what to do on image load
     image.onload = () => {
-      this.canvasContext.drawImage(
-        image,
-        0,
-        0,
-        this.canvasNativeElement.width,
-        this.canvasNativeElement.height
-      );
+      this.canvasContext.drawImage(image, 0, 0, image.width, image.height);
 
       this.canvasContext.strokeStyle = 'red';
       this.canvasContext.strokeRect(
