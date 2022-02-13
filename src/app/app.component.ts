@@ -90,7 +90,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.canvasContext.fillRect(3, 2, 180, 40);
 
       //draw the image stats text
-      this.canvasContext.fillStyle = 'red';
+      this.canvasContext.fillStyle = 'white';
       this.canvasContext.fillText(
         `canvas: width x height: ${this.canvasNativeElement.width} x ${this.canvasNativeElement.height}`,
         10,
@@ -117,12 +117,17 @@ export class AppComponent implements OnInit, AfterViewInit {
       randomImages.push(
         `https://picsum.photos/id/${Math.floor(
           Math.random() * 1000
-        )}/${Math.floor(Math.random() * 1920)}/${Math.floor(
-          Math.random() * 1080
+        )}/${this.randomBetweenMinMax(960, 1920)}/${this.randomBetweenMinMax(
+          540,
+          1080
         )}`
       );
     }
     return randomImages;
+  }
+
+  public randomBetweenMinMax(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   // resize the canvas when the window is resized
