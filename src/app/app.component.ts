@@ -21,11 +21,19 @@ export class AppComponent implements OnInit, AfterViewInit {
   private canvasNativeElement: HTMLCanvasElement;
   private canvasContext: CanvasRenderingContext2D;
 
-  private startLocation: point = { x: 0, y: 0}
-  private initialStartLocation: point = { x: this.startLocation.x, y: this.startLocation.y}
+  private startLocation: point = { x: 0, y: 0 };
+  private initialStartLocation: point = {
+    x: this.startLocation.x,
+    y: this.startLocation.y,
+  };
   private mouseDown: boolean = false;
-  private initialMouseLocation: point = { x: 0, y: 0};
+  private initialMouseLocation: point = { x: 0, y: 0 };
   private zoomLevel: number = 1;
+
+  //
+  private previousDimensions: dimensions = { width: 0, height: 0 };
+  private nextDimensions: dimensions = { width: 0, height: 0 };
+  private imageDimensions: dimensions = { width: 0, height: 0 };
 
   ngOnInit(): void {
     this.images.push(...this.generateRandomImages());
@@ -33,26 +41,35 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   //increment or decrement zoom level
-  public onZoom(direction: number){
-    if(direction == 1){
+  public onZoom(direction: number) {
+    //get the previous dimensions that the image was drawn at
+    this.previousDimensions.width = this.imageDimensions.width * this.zoomLevel;
+    this.previousDimensions.height =
+      this.imageDimensions.height * this.zoomLevel;
+
+    if (direction == 1) {
       //ZOOM IN
       this.zoomLevel += 0.1;
     }
-    if(direction == 0){
+    if (direction == 0) {
       //ZOOM OUT
       this.zoomLevel -= 0.1;
     }
 
-    this.reloadCanvas();
+    //get the next dimensions that the image WILL need to be drawn at
+    this.nextDimensions.width = this.imageDimensions.width * this.zoomLevel;
+    this.nextDimensions.height = this.imageDimensions.height * this.zoomLevel;
+
+    this.reloadCanvas(null, true);
   }
 
   //reset the zoom level
-  public onReset(){
+  public onReset() {
     this.zoomLevel = 1;
     this.reloadCanvas();
   }
 
-  public onResetImagePosition(){
+  public onResetImagePosition() {
     this.startLocation.x = 0;
     this.startLocation.y = 0;
     this.reloadCanvas();
@@ -66,11 +83,15 @@ export class AppComponent implements OnInit, AfterViewInit {
     // event listner setup for mouse movement
     this.canvasNativeElement.addEventListener('mousemove', (event) => {
       this.reloadCanvas(event);
-      if(this.mouseDown){
-        //update the start location of the image based on the initial start location of the image, the initial mouse 
+      if (this.mouseDown) {
+        //update the start location of the image based on the initial start location of the image, the initial mouse
         //location of the image, and the current mouse location, flip it with a -1 to drag it in the same direction as mouse movement
-        this.startLocation.x = this.initialStartLocation.x + ((this.initialMouseLocation.x - event.offsetX) * -1);
-        this.startLocation.y = this.initialStartLocation.y + ((this.initialMouseLocation.y - event.offsetY) * -1);
+        this.startLocation.x =
+          this.initialStartLocation.x +
+          (this.initialMouseLocation.x - event.offsetX) * -1;
+        this.startLocation.y =
+          this.initialStartLocation.y +
+          (this.initialMouseLocation.y - event.offsetY) * -1;
       }
     });
 
@@ -89,12 +110,28 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.mouseDown = false;
       console.log(this.mouseDown);
     });
+
+    this.canvasNativeElement.addEventListener('wheel', (event) => {
+      if (event.deltaY > 0) {
+        //mouse scroll down
+
+        this.onZoom(1);
+      }
+
+      if (event.deltaY < 0) {
+        //mouse scroll up
+
+        this.onZoom(0);
+      }
+    });
   }
 
   // reload the canvas
-  public reloadCanvas(mouseEvent: MouseEvent = null) {
+  public reloadCanvas(mouseEvent: MouseEvent = null, zoomed: boolean = false) {
     let image: HTMLImageElement = new Image();
     image.src = this.selectedImage;
+    this.imageDimensions.width = image.width;
+    this.imageDimensions.height = image.height;
     //what to do on image load
     image.onload = () => {
       //reset the canvas area to black
@@ -105,13 +142,35 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.canvasNativeElement.width,
         this.canvasNativeElement.height
       );
+
+      //if the user zoomed in
+      if (zoomed) {
+        console.log(this.nextDimensions);
+        console.log(this.previousDimensions);
+        this.startLocation.x -=
+          (this.nextDimensions.width - this.previousDimensions.width) / 2;
+        this.startLocation.y -=
+          (this.nextDimensions.height - this.previousDimensions.height) / 2;
+        console.log(this.startLocation);
+      }
       //draw the image
       console.log(image.src, image.width, image.height);
-      this.canvasContext.drawImage(image, this.startLocation.x, this.startLocation.y, image.width * this.zoomLevel, image.height * this.zoomLevel);
+      this.canvasContext.drawImage(
+        image,
+        this.startLocation.x,
+        this.startLocation.y,
+        image.width * this.zoomLevel,
+        image.height * this.zoomLevel
+      );
 
       //draw a box around the image
       this.canvasContext.strokeStyle = 'cyan';
-      this.canvasContext.strokeRect(this.startLocation.x, this.startLocation.y, image.width * this.zoomLevel, image.height * this.zoomLevel);
+      this.canvasContext.strokeRect(
+        this.startLocation.x,
+        this.startLocation.y,
+        image.width * this.zoomLevel,
+        image.height * this.zoomLevel
+      );
 
       //draw the mouse
       this.canvasContext.fillStyle = 'black';
@@ -121,6 +180,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         90,
         -10
       );
+
       this.canvasContext.fillStyle = 'white';
       this.canvasContext.fillText(
         `X: ${mouseEvent?.offsetX} Y: ${mouseEvent?.offsetY}`,
@@ -211,14 +271,26 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       this.canvasContext.fillText(`Image Coordinates:`, 10, 91);
-      if (mouseEvent !== null){
-        this.canvasContext.fillText(`Initial Start Point: X: ${this.initialStartLocation.x} Y: ${this.initialStartLocation.y}`, 10, 101);
-        this.canvasContext.fillText(`Moved To: X: ${this.startLocation.x} Y: ${this.startLocation.y}`, 10, 111);
+      if (mouseEvent !== null) {
+        this.canvasContext.fillText(
+          `Initial Start Point: X: ${this.initialStartLocation.x} Y: ${this.initialStartLocation.y}`,
+          10,
+          101
+        );
+        this.canvasContext.fillText(
+          `Moved To: X: ${this.startLocation.x} Y: ${this.startLocation.y}`,
+          10,
+          111
+        );
       }
       this.canvasContext.fillText(`Zoom Levels:`, 10, 121);
       this.canvasContext.fillText(`Level: ${this.zoomLevel}`, 10, 131);
       this.canvasContext.fillText(`image size with zoom:`, 10, 141);
-      this.canvasContext.fillText(`L: ${image.width * this.zoomLevel} W:${image.height * this.zoomLevel}`, 10, 151);
+      this.canvasContext.fillText(
+        `L: ${image.width * this.zoomLevel} W:${image.height * this.zoomLevel}`,
+        10,
+        151
+      );
     };
   }
 
@@ -297,4 +369,9 @@ export class AppComponent implements OnInit, AfterViewInit {
 interface point {
   x: number;
   y: number;
+}
+
+interface dimensions {
+  width: number;
+  height: number;
 }
