@@ -143,7 +143,9 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.canvasNativeElement.height
       );
 
-      //if the user zoomed in
+      //if the user zoomed in (alogirthm is using image on canvas as context)
+      //TODO: create logic maybe for if we want to zoom in at the center of the viewport instead of center of image
+      //TODO: create logic maybe for if we want to zoom in at the mouse position instead of the viewport or image
       if (zoomed) {
         console.log(this.nextDimensions);
         console.log(this.previousDimensions);
