@@ -35,6 +35,9 @@ export class AppComponent implements OnInit, AfterViewInit {
   private nextDimensions: dimensions = { width: 0, height: 0 };
   private imageDimensions: dimensions = { width: 0, height: 0 };
 
+  private showStatistics: boolean = true;
+  private showGuides: boolean = true;
+
   ngOnInit(): void {
     this.images.push(...this.generateRandomImages());
     this.selectedImage = this.images[0];
@@ -155,7 +158,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           (this.nextDimensions.height - this.previousDimensions.height) / 2;
         console.log(this.startLocation);
       }
-      
+
       //draw the image
       console.log(image.src, image.width, image.height);
       this.canvasContext.drawImage(
@@ -167,10 +170,10 @@ export class AppComponent implements OnInit, AfterViewInit {
       );
 
       //draw helpful guiding aids
-      this.drawGuidanceHelpers(image, mouseEvent);
+      if(this.showGuides) this.drawGuidanceHelpers(image, mouseEvent);
 
       //draw helpful statistics information
-      this.drawStatistics(image, mouseEvent);
+      if(this.showStatistics) this.drawStatistics(image, mouseEvent);
     };
   }
 
@@ -386,6 +389,24 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.canvasNativeElement.height
     );
   }
+
+  /**
+   * toggle the guides on and off
+   */
+  public onToggleGuides(): void{
+    this.showGuides = !this.showGuides;
+    this.reloadCanvas();
+  }
+
+  /**
+   * toggle the statistics on and off
+   * @param $event 
+   */
+  public onToggleStats($event): void {
+    console.log($event);
+    this.showStatistics = !this.showStatistics;
+    this.reloadCanvas();
+  };
 }
 
 interface point {
