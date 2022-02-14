@@ -155,6 +155,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           (this.nextDimensions.height - this.previousDimensions.height) / 2;
         console.log(this.startLocation);
       }
+      
       //draw the image
       console.log(image.src, image.width, image.height);
       this.canvasContext.drawImage(
@@ -165,135 +166,154 @@ export class AppComponent implements OnInit, AfterViewInit {
         image.height * this.zoomLevel
       );
 
-      //draw a box around the image
-      this.canvasContext.strokeStyle = 'cyan';
-      this.canvasContext.strokeRect(
-        this.startLocation.x,
-        this.startLocation.y,
-        image.width * this.zoomLevel,
-        image.height * this.zoomLevel
-      );
+      //draw helpful guiding aids
+      this.drawGuidanceHelpers(image, mouseEvent);
 
-      //draw the mouse
-      this.canvasContext.fillStyle = 'black';
-      this.canvasContext.fillRect(
-        mouseEvent?.offsetX,
-        mouseEvent?.offsetY,
-        90,
-        -10
-      );
-
-      this.canvasContext.fillStyle = 'white';
-      this.canvasContext.fillText(
-        `X: ${mouseEvent?.offsetX} Y: ${mouseEvent?.offsetY}`,
-        mouseEvent?.offsetX + 1,
-        mouseEvent?.offsetY - 1
-      );
-
-      //draw the red border
-      this.canvasContext.strokeStyle = 'red';
-      this.canvasContext.strokeRect(
-        0,
-        0,
-        this.canvasNativeElement.width,
-        this.canvasNativeElement.height
-      );
-
-      //draw the red center point
-      this.canvasContext.fillStyle = 'red';
-      this.canvasContext.fillRect(
-        this.canvasNativeElement.width / 2 - 2,
-        this.canvasNativeElement.height / 2 - 2,
-        4,
-        4
-      );
-
-      //draw the black background for the center point text
-      this.canvasContext.fillStyle = 'black';
-      this.canvasContext.fillRect(
-        this.canvasNativeElement.width / 2 - 2,
-        this.canvasNativeElement.height / 2 - 20,
-        100,
-        10
-      );
-
-      //draw the center point text
-      this.canvasContext.fillStyle = 'red';
-      this.canvasContext.fillText(
-        `center point`,
-        this.canvasNativeElement.width / 2,
-        this.canvasNativeElement.height / 2 - 10
-      );
-
-      //draw the black background for the image stats text
-      this.canvasContext.fillStyle = 'black';
-      this.canvasContext.fillRect(3, 2, 300, 200);
-
-      //draw the image stats text
-      this.canvasContext.fillStyle = 'white';
-      this.canvasContext.fillText(
-        `canvas: width x height: ${this.canvasNativeElement.width} x ${this.canvasNativeElement.height}`,
-        10,
-        11
-      );
-      this.canvasContext.fillText(
-        `image: width x height: ${image.width} x ${image.height}`,
-        10,
-        21
-      );
-      this.canvasContext.fillText(`Mouse Coordinates:`, 10, 31);
-
-      //draw the mouse coordinates
-      if (mouseEvent !== null) {
-        this.canvasContext.fillText(
-          `Offset: X: ${mouseEvent?.offsetX} Y: ${mouseEvent?.offsetY}`,
-          10,
-          41
-        );
-        this.canvasContext.fillText(
-          `Normal: X: ${mouseEvent?.x} Y: ${mouseEvent?.y}`,
-          10,
-          51
-        );
-        this.canvasContext.fillText(
-          `Page: X: ${mouseEvent?.pageX} Y: ${mouseEvent?.pageY}`,
-          10,
-          61
-        );
-        this.canvasContext.fillText(
-          `Screen: X: ${mouseEvent?.screenX} Y: ${mouseEvent?.screenY}`,
-          10,
-          71
-        );
-        this.canvasContext.fillText(
-          `Client: \t X: ${mouseEvent?.clientX} Y: ${mouseEvent?.clientY}`,
-          10,
-          81
-        );
-      }
-
-      this.canvasContext.fillText(`Image Coordinates:`, 10, 91);
-      if (mouseEvent !== null) {
-        this.canvasContext.fillText(
-          `Initial Start Point: X: ${this.initialStartLocation.x} Y: ${this.initialStartLocation.y}`,
-          10,
-          101
-        );
-        this.canvasContext.fillText(
-          `Moved To: X: ${this.startLocation.x} Y: ${this.startLocation.y}`,
-          10,
-          111
-        );
-      }
-      this.canvasContext.fillText(`Zoom Levels:`, 10, 121);
-      this.canvasContext.fillText(`Level: ${this.zoomLevel}`, 10, 131);
-      this.canvasContext.fillText(`image size with zoom:`, 10, 141);
-      this.canvasContext.fillText(
-        `L: ${image.width * this.zoomLevel} W:${image.height * this.zoomLevel}`,
-        10,
-        151
-      );
+      //draw helpful statistics information
+      this.drawStatistics(image, mouseEvent);
     };
+  }
+
+  /**
+   * draw guidance helpers for the canvas, makes things easier to percieve
+   * @param image 
+   * @param mouseEvent 
+   */
+  private drawGuidanceHelpers(image: HTMLImageElement, mouseEvent: MouseEvent) {
+    //draw a box around the image
+    this.canvasContext.strokeStyle = 'cyan';
+    this.canvasContext.strokeRect(
+      this.startLocation.x,
+      this.startLocation.y,
+      image.width * this.zoomLevel,
+      image.height * this.zoomLevel
+    );
+
+    //draw the mouse
+    this.canvasContext.fillStyle = 'black';
+    this.canvasContext.fillRect(
+      mouseEvent?.offsetX,
+      mouseEvent?.offsetY,
+      90,
+      -10
+    );
+
+    this.canvasContext.fillStyle = 'white';
+    this.canvasContext.fillText(
+      `X: ${mouseEvent?.offsetX} Y: ${mouseEvent?.offsetY}`,
+      mouseEvent?.offsetX + 1,
+      mouseEvent?.offsetY - 1
+    );
+
+    //draw the red border
+    this.canvasContext.strokeStyle = 'red';
+    this.canvasContext.strokeRect(
+      0,
+      0,
+      this.canvasNativeElement.width,
+      this.canvasNativeElement.height
+    );
+
+    //draw the red center point
+    this.canvasContext.fillStyle = 'red';
+    this.canvasContext.fillRect(
+      this.canvasNativeElement.width / 2 - 2,
+      this.canvasNativeElement.height / 2 - 2,
+      4,
+      4
+    );
+
+    //draw the black background for the center point text
+    this.canvasContext.fillStyle = 'black';
+    this.canvasContext.fillRect(
+      this.canvasNativeElement.width / 2 - 2,
+      this.canvasNativeElement.height / 2 - 20,
+      100,
+      10
+    );
+
+    //draw the center point text
+    this.canvasContext.fillStyle = 'red';
+    this.canvasContext.fillText(
+      `center point`,
+      this.canvasNativeElement.width / 2,
+      this.canvasNativeElement.height / 2 - 10
+    );
+  }
+
+  /**
+   * draw helpful statistical information in the top right corner of the canvas
+   * @param image 
+   * @param mouseEvent 
+   */
+  private drawStatistics(image: HTMLImageElement, mouseEvent: MouseEvent) {
+    this.canvasContext.fillStyle = 'black';
+    this.canvasContext.fillRect(3, 2, 300, 200);
+
+    //draw the image stats text
+    this.canvasContext.fillStyle = 'white';
+    this.canvasContext.fillText(
+      `canvas: width x height: ${this.canvasNativeElement.width} x ${this.canvasNativeElement.height}`,
+      10,
+      11
+    );
+    this.canvasContext.fillText(
+      `image: width x height: ${image.width} x ${image.height}`,
+      10,
+      21
+    );
+    this.canvasContext.fillText(`Mouse Coordinates:`, 10, 31);
+
+    //draw the mouse coordinates
+    if (mouseEvent !== null) {
+      this.canvasContext.fillText(
+        `Offset: X: ${mouseEvent?.offsetX} Y: ${mouseEvent?.offsetY}`,
+        10,
+        41
+      );
+      this.canvasContext.fillText(
+        `Normal: X: ${mouseEvent?.x} Y: ${mouseEvent?.y}`,
+        10,
+        51
+      );
+      this.canvasContext.fillText(
+        `Page: X: ${mouseEvent?.pageX} Y: ${mouseEvent?.pageY}`,
+        10,
+        61
+      );
+      this.canvasContext.fillText(
+        `Screen: X: ${mouseEvent?.screenX} Y: ${mouseEvent?.screenY}`,
+        10,
+        71
+      );
+      this.canvasContext.fillText(
+        `Client: \t X: ${mouseEvent?.clientX} Y: ${mouseEvent?.clientY}`,
+        10,
+        81
+      );
+    }
+
+    this.canvasContext.fillText(`Image Coordinates:`, 10, 91);
+    if (mouseEvent !== null) {
+      this.canvasContext.fillText(
+        `Initial Start Point: X: ${this.initialStartLocation.x} Y: ${this.initialStartLocation.y}`,
+        10,
+        101
+      );
+      this.canvasContext.fillText(
+        `Moved To: X: ${this.startLocation.x} Y: ${this.startLocation.y}`,
+        10,
+        111
+      );
+    }
+    this.canvasContext.fillText(`Zoom Levels:`, 10, 121);
+    this.canvasContext.fillText(`Level: ${this.zoomLevel}`, 10, 131);
+    this.canvasContext.fillText(`image size with zoom:`, 10, 141);
+    this.canvasContext.fillText(
+      `L: ${image.width * this.zoomLevel} W:${image.height * this.zoomLevel}`,
+      10,
+      151
+    );
   }
 
   // click on an image
