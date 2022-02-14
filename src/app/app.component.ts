@@ -165,7 +165,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
       //draw the black background for the image stats text
       this.canvasContext.fillStyle = 'black';
-      this.canvasContext.fillRect(3, 2, 180, 200);
+      this.canvasContext.fillRect(3, 2, 300, 200);
 
       //draw the image stats text
       this.canvasContext.fillStyle = 'white';
@@ -215,6 +215,10 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.canvasContext.fillText(`Initial Start Point: X: ${this.initialStartLocation.x} Y: ${this.initialStartLocation.y}`, 10, 101);
         this.canvasContext.fillText(`Moved To: X: ${this.startLocation.x} Y: ${this.startLocation.y}`, 10, 111);
       }
+      this.canvasContext.fillText(`Zoom Levels:`, 10, 121);
+      this.canvasContext.fillText(`Level: ${this.zoomLevel}`, 10, 131);
+      this.canvasContext.fillText(`image size with zoom:`, 10, 141);
+      this.canvasContext.fillText(`L: ${image.width * this.zoomLevel} W:${image.height * this.zoomLevel}`, 10, 151);
     };
   }
 
