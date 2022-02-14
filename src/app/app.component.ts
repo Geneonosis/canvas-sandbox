@@ -25,10 +25,37 @@ export class AppComponent implements OnInit, AfterViewInit {
   private initialStartLocation: point = { x: this.startLocation.x, y: this.startLocation.y}
   private mouseDown: boolean = false;
   private initialMouseLocation: point = { x: 0, y: 0};
+  private zoomLevel: number = 1;
 
   ngOnInit(): void {
     this.images.push(...this.generateRandomImages());
     this.selectedImage = this.images[0];
+  }
+
+  //increment or decrement zoom level
+  public onZoom(direction: number){
+    if(direction == 1){
+      //ZOOM IN
+      this.zoomLevel += 0.1;
+    }
+    if(direction == 0){
+      //ZOOM OUT
+      this.zoomLevel -= 0.1;
+    }
+
+    this.reloadCanvas();
+  }
+
+  //reset the zoom level
+  public onReset(){
+    this.zoomLevel = 1;
+    this.reloadCanvas();
+  }
+
+  public onResetImagePosition(){
+    this.startLocation.x = 0;
+    this.startLocation.y = 0;
+    this.reloadCanvas();
   }
 
   ngAfterViewInit(): void {
@@ -80,11 +107,11 @@ export class AppComponent implements OnInit, AfterViewInit {
       );
       //draw the image
       console.log(image.src, image.width, image.height);
-      this.canvasContext.drawImage(image, this.startLocation.x, this.startLocation.y, image.width, image.height);
+      this.canvasContext.drawImage(image, this.startLocation.x, this.startLocation.y, image.width * this.zoomLevel, image.height * this.zoomLevel);
 
       //draw a box around the image
       this.canvasContext.strokeStyle = 'cyan';
-      this.canvasContext.strokeRect(this.startLocation.x, this.startLocation.y, image.width, image.height);
+      this.canvasContext.strokeRect(this.startLocation.x, this.startLocation.y, image.width * this.zoomLevel, image.height * this.zoomLevel);
 
       //draw the mouse
       this.canvasContext.fillStyle = 'black';

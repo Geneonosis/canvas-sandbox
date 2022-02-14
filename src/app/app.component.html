@@ -9,5 +9,11 @@
   </div>
   <div id="canvasContainer">
     <canvas #canvas width="1579" height="917"></canvas>
+    <span id="controls">
+      <button (click)="onZoom(1)">zoom in</button>
+      <button (click)="onZoom(0)">zoom out</button>
+      <button (click)="onReset()">reset</button>
+      <button (click)="onResetImagePosition()">reset image pos</button>
+    </span>
   </div>
 </div>
