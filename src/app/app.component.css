@@ -1,3 +1,15 @@
+#controls{
+  position: fixed;
+  background-color: transparent;
+  bottom: 0;
+  right: 0;
+}
+
+button{
+  margin: 10px;
+  padding: 10px;
+}
+
 #imageList {
   display: flex;
   flex-direction: column;
