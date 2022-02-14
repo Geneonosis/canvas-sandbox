@@ -1,3 +1,4 @@
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import {
   AfterViewInit,
   Component,
@@ -20,6 +21,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   private canvasNativeElement: HTMLCanvasElement;
   private canvasContext: CanvasRenderingContext2D;
 
+  private startLocation: point = { x: 0, y: 0}
+  private initialStartLocation: point = { x: this.startLocation.x, y: this.startLocation.y}
+  private mouseDown: boolean = false;
+  private initialMouseLocation: point = { x: 0, y: 0};
+
   ngOnInit(): void {
     this.images.push(...this.generateRandomImages());
     this.selectedImage = this.images[0];
@@ -33,6 +39,28 @@ export class AppComponent implements OnInit, AfterViewInit {
     // event listner setup for mouse movement
     this.canvasNativeElement.addEventListener('mousemove', (event) => {
       this.reloadCanvas(event);
+      if(this.mouseDown){
+        //update the start location of the image based on the initial start location of the image, the initial mouse 
+        //location of the image, and the current mouse location, flip it with a -1 to drag it in the same direction as mouse movement
+        this.startLocation.x = this.initialStartLocation.x + ((this.initialMouseLocation.x - event.offsetX) * -1);
+        this.startLocation.y = this.initialStartLocation.y + ((this.initialMouseLocation.y - event.offsetY) * -1);
+      }
+    });
+
+    this.canvasNativeElement.addEventListener('mousedown', (event) => {
+      this.mouseDown = true;
+      //capture the inital mouse positions and initial start location for the image on the canvas
+      //need to know this infomation to do offset math when re-drawing.
+      this.initialMouseLocation.x = event.offsetX;
+      this.initialMouseLocation.y = event.offsetY;
+      this.initialStartLocation.x = this.startLocation.x;
+      this.initialStartLocation.y = this.startLocation.y;
+      console.log(this.mouseDown);
+    });
+
+    this.canvasNativeElement.addEventListener('mouseup', (event) => {
+      this.mouseDown = false;
+      console.log(this.mouseDown);
     });
   }
 
@@ -52,11 +80,11 @@ export class AppComponent implements OnInit, AfterViewInit {
       );
       //draw the image
       console.log(image.src, image.width, image.height);
-      this.canvasContext.drawImage(image, 0, 0, image.width, image.height);
+      this.canvasContext.drawImage(image, this.startLocation.x, this.startLocation.y, image.width, image.height);
 
       //draw a box around the image
       this.canvasContext.strokeStyle = 'cyan';
-      this.canvasContext.strokeRect(0, 0, image.width, image.height);
+      this.canvasContext.strokeRect(this.startLocation.x, this.startLocation.y, image.width, image.height);
 
       //draw the mouse
       this.canvasContext.fillStyle = 'black';
@@ -227,4 +255,9 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.canvasNativeElement.height
     );
   }
+}
+
+interface point {
+  x: number;
+  y: number;
 }
