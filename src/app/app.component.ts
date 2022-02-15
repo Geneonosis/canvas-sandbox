@@ -46,9 +46,17 @@ export class AppComponent implements OnInit, AfterViewInit {
   //increment or decrement zoom level
   public onZoom(direction: number) {
     //get the previous dimensions that the image was drawn at
-    this.previousDimensions.width = this.imageDimensions.width * this.zoomLevel;
-    this.previousDimensions.height =
-      this.imageDimensions.height * this.zoomLevel;
+    if (this.relation == relation.image || this.relation == relation.canvas) {
+      this.previousDimensions.width =
+        this.imageDimensions.width * this.zoomLevel;
+      this.previousDimensions.height =
+        this.imageDimensions.height * this.zoomLevel;
+    }
+
+
+    if(this.relation == relation.pointer){
+
+    }
 
     if (direction == 1) {
       //ZOOM IN
@@ -60,8 +68,13 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     //get the next dimensions that the image WILL need to be drawn at
-    this.nextDimensions.width = this.imageDimensions.width * this.zoomLevel;
-    this.nextDimensions.height = this.imageDimensions.height * this.zoomLevel;
+    if (this.relation == relation.image || this.relation == relation.canvas) {
+      this.nextDimensions.width = this.imageDimensions.width * this.zoomLevel;
+      this.nextDimensions.height = this.imageDimensions.height * this.zoomLevel;
+    }
+    if(this.relation == relation.pointer) {
+
+    }
 
     this.reloadCanvas(null, true);
   }
@@ -147,16 +160,57 @@ export class AppComponent implements OnInit, AfterViewInit {
       );
 
       //if the user zoomed in (alogirthm is using image on canvas as context)
-      //TODO: create logic maybe for if we want to zoom in at the center of the viewport instead of center of image
-      //TODO: create logic maybe for if we want to zoom in at the mouse position instead of the viewport or image
-      if (zoomed) {
+      if (zoomed && this.relation == relation.image) {
         console.log(this.nextDimensions);
         console.log(this.previousDimensions);
+        //same as multiplying by 1/2. relation = image. meaning that both sides of the image are equivilantly
+        //proportioned... need to do math to figure out % of image on each side of center point.
         this.startLocation.x -=
           (this.nextDimensions.width - this.previousDimensions.width) / 2;
         this.startLocation.y -=
           (this.nextDimensions.height - this.previousDimensions.height) / 2;
         console.log(this.startLocation);
+      }
+
+      if (zoomed && this.relation == relation.canvas) {
+        //TODO: create logic maybe for if we want to zoom in at the center of the viewport instead of center of image
+        let canvasWidth = this.canvasNativeElement.width;
+        let canvasHeight = this.canvasNativeElement.height;
+
+        let canvasWidthHalf = canvasWidth/2;
+        let canvasHeightHalf = canvasHeight/2;
+
+        //example
+        //canvas width = 100
+        //canvasWidthHalf = 100 / 2 = 50
+        //image starts at 0,0
+        //image width = 100
+        //0 + 100 = 100 / 50 = 2
+
+        //example
+        //canvas width = 100
+        //canvasWidthHalf = 100 / 2 = 50
+        //image starts at 0,0
+        //image width = 50
+        //0 + 50 = 50 / 50 = 1
+
+        //example
+        //canvas width = 100
+        //canvasWidthHalf = 100 / 2 = 50
+        //image starts at 0,0
+        //image width = 200
+        //0 + 200 = 200 / 50 = 4
+
+        let percentageOfImageWidthOnLeft = (this.startLocation.x + (this.imageDimensions.width * this.zoomLevel)) / canvasWidthHalf;
+        let percentageOfImageHeightOnLeft = (this.startLocation.y + (this.imageDimensions.height * this.zoomLevel)) / canvasHeightHalf;
+        console.log(`1/${percentageOfImageWidthOnLeft}`, `1/${percentageOfImageHeightOnLeft}`);
+
+        this.startLocation.x -= (this.nextDimensions.width - this.previousDimensions.width) * 1/percentageOfImageWidthOnLeft;
+        this.startLocation.y -= (this.nextDimensions.height - this.previousDimensions.height) * 1/percentageOfImageHeightOnLeft;
+      }
+
+      if (zoomed && this.relation == relation.pointer) {
+        //TODO: create logic maybe for if we want to zoom in at the mouse position instead of the viewport or image
       }
 
       //draw the image
@@ -170,17 +224,17 @@ export class AppComponent implements OnInit, AfterViewInit {
       );
 
       //draw helpful guiding aids
-      if(this.showGuides) this.drawGuidanceHelpers(image, mouseEvent);
+      if (this.showGuides) this.drawGuidanceHelpers(image, mouseEvent);
 
       //draw helpful statistics information
-      if(this.showStatistics) this.drawStatistics(image, mouseEvent);
+      if (this.showStatistics) this.drawStatistics(image, mouseEvent);
     };
   }
 
   /**
    * draw guidance helpers for the canvas, makes things easier to percieve
-   * @param image 
-   * @param mouseEvent 
+   * @param image
+   * @param mouseEvent
    */
   private drawGuidanceHelpers(image: HTMLImageElement, mouseEvent: MouseEvent) {
     //draw a box around the image
@@ -246,8 +300,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   /**
    * draw helpful statistical information in the top right corner of the canvas
-   * @param image 
-   * @param mouseEvent 
+   * @param image
+   * @param mouseEvent
    */
   private drawStatistics(image: HTMLImageElement, mouseEvent: MouseEvent) {
     this.canvasContext.fillStyle = 'black';
@@ -393,20 +447,45 @@ export class AppComponent implements OnInit, AfterViewInit {
   /**
    * toggle the guides on and off
    */
-  public onToggleGuides(): void{
+  public onToggleGuides(): void {
     this.showGuides = !this.showGuides;
     this.reloadCanvas();
   }
 
   /**
-   * toggle the statistics on and off
-   * @param $event 
+   * toggle the statistics on and
+   * @param $event
    */
   public onToggleStats($event): void {
     console.log($event);
     this.showStatistics = !this.showStatistics;
     this.reloadCanvas();
-  };
+  }
+
+  private relation: relation = relation.image;
+  public setRelativeZoom(rel: string) {
+    switch (rel.toLowerCase()) {
+      case 'image':
+        this.relation = relation.image;
+        break;
+      case 'canvas':
+        this.relation = relation.canvas;
+        break;
+      case 'pointer':
+        this.relation = relation.pointer;
+        break;
+      default:
+        this.relation = relation.image;
+        break;
+    }
+    console.log(this.relation);
+  }
+}
+
+enum relation {
+  image = 'image',
+  canvas = 'canvas',
+  pointer = 'pointer',
 }
 
 interface point {

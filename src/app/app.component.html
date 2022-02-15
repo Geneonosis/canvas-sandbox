@@ -3,16 +3,56 @@
     <span id="title">
       <h3>Image List</h3>
     </span>
-    <span id="imageItem" *ngFor="let image of images" (click)="onClickImage(image)">
-      <img id="imageElement" src="{{image}}" alt="{{image}}" onerror="this.style.display='none'" />
+    <span
+      id="imageItem"
+      *ngFor="let image of images"
+      (click)="onClickImage(image)"
+    >
+      <img
+        id="imageElement"
+        src="{{ image }}"
+        alt="{{ image }}"
+        onerror="this.style.display='none'"
+      />
     </span>
   </div>
   <div id="canvasContainer">
     <canvas #canvas width="1579" height="917"></canvas>
     <span id="controls">
-      <input type="checkbox" (change)="onToggleGuides()" id="guides" checked/>
+      <span id="radio-controls">
+        <label>zoom relative to:</label>
+        <input
+          type="radio"
+          id="to-center-of-image"
+          name="relativeZoom"
+          (click)="setRelativeZoom('image')"
+          checked
+        />
+        <label for="to-center-of-image">center of image</label>
+        <input
+          type="radio"
+          id="to-center-of-canvas"
+          name="relativeZoom"
+          (click)="setRelativeZoom('canvas')"
+        />
+        <label for="to-center-of-canvas">center of canvas</label>
+        <input
+          type="radio"
+          id="to-pointer"
+          name="relativeZoom"
+          (click)="setRelativeZoom('pointer')"
+        />
+        <label for="to-pointer">pointer</label>
+      </span>
+
+      <input type="checkbox" (change)="onToggleGuides()" id="guides" checked />
       <label for="guides">Guides</label>
-      <input type="checkbox" (change)="onToggleStats($event)" id="stats" checked/>
+      <input
+        type="checkbox"
+        (change)="onToggleStats($event)"
+        id="stats"
+        checked
+      />
       <label for="stats">Statistics</label>
       <button (click)="onZoom(1)">zoom in</button>
       <button (click)="onZoom(0)">zoom out</button>
